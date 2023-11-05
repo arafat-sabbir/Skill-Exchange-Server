@@ -85,6 +85,20 @@ async function run() {
       }
     });
 
+    app.get('/api/jobsBy-category',async(req,res)=>{
+       const query = { category: req.query?.category };
+     
+      const result = await JobsCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    app.get('/api/bidJobs/:id',async(req,res)=>{
+      const id = req.params?.id
+      const query = {_id:new ObjectId(id)}
+      const result =await JobsCollection.findOne(query)
+      res.send(result)
+    })
+
     // Add Job in the Job Collection
     app.post("/api/add-jobs", async (req, res) => {
       const job = req.body;
