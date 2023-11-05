@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
@@ -8,10 +8,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors({
-  origin:['http://localhost:5173'],
-  credentials:true
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -51,36 +53,30 @@ async function run() {
 
     const JobsCollection = client.db("Jobs").collection("jobs");
 
-    app.post("/api/user/accessToken", async (req, res) => {
-      try {
-        const user = req.body;
-        const userinfo = req.user;
-        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: "1hr",
-        });
-        res
-          .cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-          })
-          .send({ success: true }, userinfo);
-      } catch (error) {
-        console.log(error);
-      }
-    });
-    
+    // app.post("/api/user/accessToken", async (req, res) => {
+    //   try {
+    //     const user = req.body;
+    //     const userinfo = req.user;
+    //     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //       expiresIn: "1hr",
+    //     });
+    //     res
+    //       .cookie("token", token, {
+    //         httpOnly: true,
+    //         secure: true,
+    //         sameSite: "none",
+    //       })
+    //       .send({ success: true }, userinfo);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // });
 
     app.get("/api/jobs", async (req, res) => {
       try {
-        const userEmail = req.query?.email;
-        const category = req.query?.category;
-        const query = {};
-        if (category) {
-          query.category=category;
-        }
-        else if (userEmail) {
-          query.email = userEmail;
+        let query = {};
+        if (req.query?.email) {
+          query = { sellerEmail: req.query.email };
         }
         const result = await JobsCollection.find(query).toArray();
         res.send(result);
@@ -88,6 +84,26 @@ async function run() {
         console.log(error);
       }
     });
+
+    // Add Job in the Job Collection
+    app.post("/api/add-jobs", async (req, res) => {
+      const job = req.body;
+      const result = await JobsCollection.insertOne(job);
+      res.send(result);
+    });
+
+    app.delete("/api/delete-jobs/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: new ObjectId(id) };
+        const result = await JobsCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
