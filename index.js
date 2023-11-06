@@ -52,6 +52,7 @@ async function run() {
     await client.connect();
 
     const JobsCollection = client.db("Jobs").collection("jobs");
+    const BidCollection = client.db("Jobs").collection("bids");
 
     // app.post("/api/user/accessToken", async (req, res) => {
     //   try {
@@ -84,54 +85,34 @@ async function run() {
         console.log(error);
       }
     });
-    app.get("/api/bid", async (req, res) => {
+    // Get My bids By bidderEmail
+    app.get("/api/getMyBid", async (req, res) => {
       try {
         let query = {};
-        if (req.query?.biddingemail) {
-          query = { biddingEmail: req.query.biddingEmail };
+        if (req.query?.bidderEmail) {
+          query = { bidderEmail: req.query.bidderEmail };
         }
-        const result = await JobsCollection.find(query).toArray();
-        res.send(result);
-      } catch (error) {
-        console.log(error);
-      }
-    });
-    app.get("/api/bidReq", async (req, res) => {
-      try {
-        let query = {};
-        if (req.query?.biddingStatus) {
-          query = { biddingStatus: req.query.biddingStatus };
-        }
-        const result = await JobsCollection.find(query).toArray();
+        const result = await BidCollection.find(query).toArray();
         res.send(result);
       } catch (error) {
         console.log(error);
       }
     });
 
-    app.put("/api/Bidjobs/:id", async (req, res) => {
-      const jobinfo = req.body;
-      const query = { _id: new ObjectId(id) };
-      const filter = { title: "Random Harvest" };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          plot: `A harvest of random numbers, such as: ${Math.random()}`,
-        },
-      };
-      const result = await JobsCollection.updateOne(filter, updateDoc, options);
-    });
-    app.put("/api/updatejobs/:id", async (req, res) => {
-      const jobinfo = req.body;
-      const query = { _id: new ObjectId(id) };
-      const filter = { title: "Random Harvest" };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          plot: `A harvest of random numbers, such as: ${Math.random()}`,
-        },
-      };
-      const result = await JobsCollection.updateOne(filter, updateDoc, options);
+    app.get("/api/bidReq", async (req, res) => {
+      try {
+        let query = {};
+        if (req.query?.biddingStatus && query.sellerEmail) {
+          query = {
+            biddingStatus: req.query.biddingStatus,
+            sellerEmail: req.query.sellerEmail,
+          };
+        }
+        const result = await JobsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     app.get("/api/jobsBy-category", async (req, res) => {
@@ -152,6 +133,11 @@ async function run() {
     app.post("/api/add-jobs", async (req, res) => {
       const job = req.body;
       const result = await JobsCollection.insertOne(job);
+      res.send(result);
+    });
+    app.post("/api/add-bids", async (req, res) => {
+      const job = req.body;
+      const result = await BidCollection.insertOne(job);
       res.send(result);
     });
 
