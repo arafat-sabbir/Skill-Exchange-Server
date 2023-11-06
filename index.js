@@ -99,16 +99,16 @@ async function run() {
       }
     });
 
-    app.get("/api/bidReq", async (req, res) => {
+    app.get("/api/getbidreq", async (req, res) => {
       try {
         let query = {};
-        if (req.query?.biddingStatus && query.sellerEmail) {
+        if (req.query?.bidded) {
           query = {
-            biddingStatus: req.query.biddingStatus,
+            bidded: req.query.bidded,
             sellerEmail: req.query.sellerEmail,
           };
         }
-        const result = await JobsCollection.find(query).toArray();
+        const result = await BidCollection.find(query).toArray();
         res.send(result);
       } catch (error) {
         console.log(error);
