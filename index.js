@@ -141,6 +141,38 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/api/update-job/:id", async (req, res) => {
+      const id = req.params.id;
+      const jobifo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatejob = {
+        $set: {
+          sellerEmail: jobifo.sellerEmail,
+          jobtitle: jobifo.jobtitle,
+          minPrice: jobifo.minPrice,
+          maxPrice: jobifo.maxPrice,
+          description: jobifo.description,
+          category: jobifo.category,
+          deadline: jobifo.deadline,
+        },
+      };
+      const result = await JobsCollection.updateOne(query, updatejob);
+      res.send(result);
+    });
+    app.patch("/api/update-status/:id", async (req, res) => {
+      const id = req.params.id;
+      const jobifo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatestatus = {
+        $set: {
+          biddingStatus: jobifo.status,
+        },
+      };
+      const result = await BidCollection.updateOne(query, updatestatus);
+      res.send({ result });
+    });
+
+
     app.delete("/api/delete-jobs/:id", async (req, res) => {
       try {
         const id = req.params.id;
