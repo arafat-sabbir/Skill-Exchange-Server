@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://skill-exchange-1c418.web.app"],
     credentials: true,
   })
 );
@@ -84,20 +84,69 @@ async function run() {
         console.log(error);
       }
     });
+    app.get("/api/bid", async (req, res) => {
+      try {
+        let query = {};
+        if (req.query?.biddingemail) {
+          query = { biddingEmail: req.query.biddingEmail };
+        }
+        const result = await JobsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    app.get("/api/bidReq", async (req, res) => {
+      try {
+        let query = {};
+        if (req.query?.biddingStatus) {
+          query = { biddingStatus: req.query.biddingStatus };
+        }
+        const result = await JobsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
 
-    app.get('/api/jobsBy-category',async(req,res)=>{
-       const query = { category: req.query?.category };
-     
-      const result = await JobsCollection.find(query).toArray()
-      res.send(result)
-    })
+    app.put("/api/Bidjobs/:id", async (req, res) => {
+      const jobinfo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const filter = { title: "Random Harvest" };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          plot: `A harvest of random numbers, such as: ${Math.random()}`,
+        },
+      };
+      const result = await JobsCollection.updateOne(filter, updateDoc, options);
+    });
+    app.put("/api/updatejobs/:id", async (req, res) => {
+      const jobinfo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const filter = { title: "Random Harvest" };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          plot: `A harvest of random numbers, such as: ${Math.random()}`,
+        },
+      };
+      const result = await JobsCollection.updateOne(filter, updateDoc, options);
+    });
 
-    app.get('/api/bidJobs/:id',async(req,res)=>{
-      const id = req.params?.id
-      const query = {_id:new ObjectId(id)}
-      const result =await JobsCollection.findOne(query)
-      res.send(result)
-    })
+    app.get("/api/jobsBy-category", async (req, res) => {
+      const query = { category: req.query?.category };
+
+      const result = await JobsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/api/bidJobs/:id", async (req, res) => {
+      const id = req.params?.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await JobsCollection.findOne(query);
+      res.send(result);
+    });
 
     // Add Job in the Job Collection
     app.post("/api/add-jobs", async (req, res) => {
