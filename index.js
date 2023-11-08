@@ -36,9 +36,7 @@ const verifyToken = (req, res, next) => {
   if (token) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
       if (err) {
-        return res
-          .status(401)
-          .send({ message: "Invalid Access Detected" });
+        return res.status(401).send({ message: "Invalid Access Detected" });
       }
       req.user = decoded;
       next();
@@ -79,8 +77,8 @@ async function run() {
 
     app.get("/api/jobs", verifyToken, async (req, res) => {
       try {
-        if(req.user.email !==req.query.email){
-          return res.status(403).send({message:'Forbidden Access'})
+        if (req.user.email !== req.query.email) {
+          return res.status(403).send({ message: "Forbidden Access" });
         }
         let query = {};
         if (req.query?.email) {
@@ -95,14 +93,16 @@ async function run() {
     // Get My bids By bidderEmail
     app.get("/api/getMyBid", verifyToken, async (req, res) => {
       try {
-        if(req.user.email !==req.query.bidderEmail){
-          return res.status(403).send({message:'Forbidden Access'})
+        if (req.user.email !== req.query.bidderEmail) {
+          return res.status(403).send({ message: "Forbidden Access" });
         }
         let query = {};
+        let sort = {};
+        sort["biddingStatus"] = "asc";
         if (req.query?.bidderEmail) {
           query = { bidderEmail: req.query.bidderEmail };
         }
-        const result = await BidCollection.find(query).toArray();
+        const result = await BidCollection.find(query).sort(sort).toArray();
         res.send(result);
       } catch (error) {
         console.log(error);
@@ -111,8 +111,8 @@ async function run() {
 
     app.get("/api/getbidreq", verifyToken, async (req, res) => {
       try {
-        if(req.user.email !==req.query.sellerEmail){
-          return res.status(403).send({message:'Forbidden Access'})
+        if (req.user.email !== req.query.sellerEmail) {
+          return res.status(403).send({ message: "Forbidden Access" });
         }
         let query = {};
         if (req.query?.bidded) {
