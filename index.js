@@ -28,23 +28,23 @@ const client = new MongoClient(uri, {
   },
 });
 
-// const verifyToken = (req, res, next) => {
-//   const token = req.cookies.token;
-//   if (!token) {
-//     return res.status(401).send({ message: "Unauthorized Access Detected" });
-//   }
-//   if (token) {
-//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-//       if (err) {
-//         return res
-//           .status(401)
-//           .send({ message: "Unauthorized Session Detected" });
-//       }
-//       req.user = jwt.decoded;
-//       next();
-//     });
-//   }
-// };
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access Detected" });
+  }
+  if (token) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        return res
+          .status(401)
+          .send({ message: "Invalid Access Detected" });
+      }
+      req.user = decoded;
+      next();
+    });
+  }
+};
 
 async function run() {
   try {
@@ -62,24 +62,26 @@ async function run() {
         });
         res
           .cookie("token", token, {
-            httpOnly: true,
-            secure: true,
             sameSite: "none",
+            secure: true,
+            httpOnly: true,
           })
-          .send({ success: true }, userinfo);
+          .send({ token });
       } catch (error) {
-        res.send(error);
+        res.status(401).send(error);
       }
     });
-    app.post('/api/user/signOut',async(req,res)=>{
+    app.post("/api/user/signOut", async (req, res) => {
       const user = req.body;
-      console.log('signOut user',user);
-      res.clearCookie('token',{maxAge:0})
-      .send({clearsuccess:true})
-  })
+      console.log("signOut user", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ clearsuccess: true });
+    });
 
-    app.get("/api/jobs", async (req, res) => {
+    app.get("/api/jobs", verifyToken, async (req, res) => {
       try {
+        if(req.user.email !==req.query.email){
+          return res.status(403).send({message:'Forbidden Access'})
+        }
         let query = {};
         if (req.query?.email) {
           query = { sellerEmail: req.query.email };
@@ -91,8 +93,11 @@ async function run() {
       }
     });
     // Get My bids By bidderEmail
-    app.get("/api/getMyBid", async (req, res) => {
+    app.get("/api/getMyBid", verifyToken, async (req, res) => {
       try {
+        if(req.user.email !==req.query.bidderEmail){
+          return res.status(403).send({message:'Forbidden Access'})
+        }
         let query = {};
         if (req.query?.bidderEmail) {
           query = { bidderEmail: req.query.bidderEmail };
@@ -104,8 +109,11 @@ async function run() {
       }
     });
 
-    app.get("/api/getbidreq", async (req, res) => {
+    app.get("/api/getbidreq", verifyToken, async (req, res) => {
       try {
+        if(req.user.email !==req.query.sellerEmail){
+          return res.status(403).send({message:'Forbidden Access'})
+        }
         let query = {};
         if (req.query?.bidded) {
           query = {
