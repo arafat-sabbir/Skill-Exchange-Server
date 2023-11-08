@@ -54,24 +54,29 @@ async function run() {
     const JobsCollection = client.db("Jobs").collection("jobs");
     const BidCollection = client.db("Jobs").collection("bids");
 
-    // app.post("/api/user/accessToken", async (req, res) => {
-    //   try {
-    //     const user = req.body;
-    //     // const userinfo = req.user;
-    //     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    //       expiresIn: "1hr",
-    //     });
-    //     res
-    //       .cookie("token", token, {
-    //         httpOnly: true,
-    //         secure: true,
-    //         sameSite: "none",
-    //       })
-    //       .send({ success: true }, userinfo);
-    //   } catch (error) {
-    //     res.send(error);
-    //   }
-    // });
+    app.post("/api/user/accessToken", async (req, res) => {
+      try {
+        const user = req.body;
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: "1hr",
+        });
+        res
+          .cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+          })
+          .send({ success: true }, userinfo);
+      } catch (error) {
+        res.send(error);
+      }
+    });
+    app.post('/api/user/signOut',async(req,res)=>{
+      const user = req.body;
+      console.log('signOut user',user);
+      res.clearCookie('token',{maxAge:0})
+      .send({clearsuccess:true})
+  })
 
     app.get("/api/jobs", async (req, res) => {
       try {
