@@ -57,7 +57,7 @@ async function run() {
     // app.post("/api/user/accessToken", async (req, res) => {
     //   try {
     //     const user = req.body;
-    //     const userinfo = req.user;
+    //     // const userinfo = req.user;
     //     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     //       expiresIn: "1hr",
     //     });
@@ -69,7 +69,7 @@ async function run() {
     //       })
     //       .send({ success: true }, userinfo);
     //   } catch (error) {
-    //     console.log(error);
+    //     res.send(error);
     //   }
     // });
 
@@ -116,63 +116,117 @@ async function run() {
     });
 
     app.get("/api/jobsBy-category", async (req, res) => {
-      const query = { category: req.query?.category };
+      try {
+        const query = { category: req.query?.category };
 
-      const result = await JobsCollection.find(query).toArray();
-      res.send(result);
+        const result = await JobsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     app.get("/api/bidJobs/:id", async (req, res) => {
-      const id = req.params?.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await JobsCollection.findOne(query);
-      res.send(result);
+      try {
+        const id = req.params?.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await JobsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     // Add Job in the Job Collection
     app.post("/api/add-jobs", async (req, res) => {
-      const job = req.body;
-      const result = await JobsCollection.insertOne(job);
-      res.send(result);
+      try {
+        const job = req.body;
+        const result = await JobsCollection.insertOne(job);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.post("/api/add-bids", async (req, res) => {
-      const job = req.body;
-      const result = await BidCollection.insertOne(job);
-      res.send(result);
+      try {
+        const job = req.body;
+        const result = await BidCollection.insertOne(job);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     app.patch("/api/update-job/:id", async (req, res) => {
-      const id = req.params.id;
-      const jobifo = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updatejob = {
-        $set: {
-          sellerEmail: jobifo.sellerEmail,
-          jobtitle: jobifo.jobtitle,
-          minPrice: jobifo.minPrice,
-          maxPrice: jobifo.maxPrice,
-          description: jobifo.description,
-          category: jobifo.category,
-          deadline: jobifo.deadline,
-        },
-      };
-      const result = await JobsCollection.updateOne(query, updatejob);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const jobifo = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updatejob = {
+          $set: {
+            sellerEmail: jobifo.sellerEmail,
+            jobtitle: jobifo.jobtitle,
+            minPrice: jobifo.minPrice,
+            maxPrice: jobifo.maxPrice,
+            description: jobifo.description,
+            category: jobifo.category,
+            deadline: jobifo.deadline,
+          },
+        };
+        const result = await JobsCollection.updateOne(query, updatejob);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
     app.patch("/api/update-status/:id", async (req, res) => {
-      const id = req.params.id;
-      const jobifo = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updatestatus = {
-        $set: {
-          biddingStatus: jobifo.status,
-        },
-      };
-      const result = await BidCollection.updateOne(query, updatestatus);
-      res.send({ result });
+      try {
+        const id = req.params.id;
+        const jobifo = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updatestatus = {
+          $set: {
+            biddingStatus: jobifo.status,
+          },
+        };
+        const result = await BidCollection.updateOne(query, updatestatus);
+        res.send({ result });
+      } catch (error) {
+        console.log(error);
+      }
     });
-
-
+    app.patch("/api/reject-status/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const jobifo = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updatestatus = {
+          $set: {
+            biddingStatus: jobifo.status,
+          },
+        };
+        const result = await BidCollection.updateOne(query, updatestatus);
+        res.send({ result });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    app.patch("/api/complete-status/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const jobifo = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updatestatus = {
+          $set: {
+            biddingStatus: jobifo.status,
+          },
+        };
+        const result = await BidCollection.updateOne(query, updatestatus);
+        res.send({ result });
+      } catch (error) {
+        console.log(error);
+      }
+    });
     app.delete("/api/delete-jobs/:id", async (req, res) => {
       try {
         const id = req.params.id;
