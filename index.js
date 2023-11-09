@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://skill-exchange-1c418.web.app"],
+    origin: ["https://rococo-queijadas-4a8d5c.netlify.app","https://skill-exchange-port.web.app"],
     credentials: true,
   })
 );
@@ -92,12 +92,13 @@ async function run() {
     // Get My bids By bidderEmail
     app.get("/api/getMyBid", verifyToken, async (req, res) => {
       try {
+        const sortValue = req.query.sortvalue;
         if (req.user.email !== req.query.bidderEmail) {
           return res.status(403).send({ message: "Forbidden Access" });
         }
         let query = {};
         let sort = {};
-        sort["biddingStatus"] = "asc";
+        sort["biddingStatus"] = sortValue;
         if (req.query?.bidderEmail) {
           query = { bidderEmail: req.query.bidderEmail };
         }
