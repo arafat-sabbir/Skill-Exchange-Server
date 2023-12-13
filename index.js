@@ -50,6 +50,8 @@ async function run() {
 
     const JobsCollection = client.db("Jobs").collection("jobs");
     const BidCollection = client.db("Jobs").collection("bids");
+    const ReviewCollection = client.db("Jobs").collection("review");
+    const bookmarkCollection = client.db("Jobs").collection("bookmark");
 
     app.post("/api/user/accessToken", async (req, res) => {
       try {
@@ -108,6 +110,16 @@ async function run() {
         console.log(error);
       }
     });
+    app.get('/review/:id',async(req,res)=>{
+      const query  = {postid:req.params.id}
+      const result = await ReviewCollection.find(query).toArray()
+      res.send(result)
+    })
+    app.post('/addtobookmark',async(req,res)=>{
+      const bookmarkData = req.body;
+      const result = await bookmarkCollection.insertOne(bookmarkData)
+      res.send(result)
+    })
 
     app.get("/api/getbidreq", verifyToken, async (req, res) => {
       try {
