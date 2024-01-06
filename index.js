@@ -10,7 +10,11 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["https://rococo-queijadas-4a8d5c.netlify.app","https://skill-exchange-port.web.app"],
+    origin: [
+      "https://rococo-queijadas-4a8d5c.netlify.app",
+      "https://skill-exchange-port.web.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
   })
 );
@@ -47,12 +51,11 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-
     const JobsCollection = client.db("Jobs").collection("jobs");
     const BidCollection = client.db("Jobs").collection("bids");
     const ReviewCollection = client.db("Jobs").collection("review");
     const bookmarkCollection = client.db("Jobs").collection("bookmark");
-
+    // Make A Token For Signed In User
     app.post("/api/user/accessToken", async (req, res) => {
       try {
         const user = req.body;
@@ -70,12 +73,13 @@ async function run() {
         res.status(401).send(error);
       }
     });
+    // Clear the cookie if user is not logged in
     app.post("/api/user/signOut", async (req, res) => {
       const user = req.body;
       console.log("signOut user", user);
       res.clearCookie("token", { maxAge: 0 }).send({ clearsuccess: true });
     });
-
+    // Get Job For My Posted Jobs
     app.get("/api/jobs", verifyToken, async (req, res) => {
       try {
         if (req.user.email !== req.query.email) {
@@ -110,16 +114,40 @@ async function run() {
         console.log(error);
       }
     });
-    app.get('/review/:id',async(req,res)=>{
-      const query  = {postid:req.params.id}
-      const result = await ReviewCollection.find(query).toArray()
-      res.send(result)
+    // Get review Based On Post Id
+    app.get("/api/review/:id", async (req, res) => {
+      const query = { postid: req.params.id };
+      const result = await ReviewCollection.find(query).toArray();
+      res.send(result);
+    });
+    // Add Review On Post
+    app.post("/api/addReview", async (req, res) => {
+      const reviewData = req.body;
+      console.log(reviewData);
+      const result = await ReviewCollection.insertOne(reviewData);
+      res.send(result);
+    });
+    // Get the bookmarked Post For User
+    app.get("/api/bookmarks", async (req, res) => {
+      const email = req.query.email;
+      const query = { bookmarkUser: email };
+      const result = await bookmarkCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Delete A bookmarked Post
+    app.delete('/api/deleteBookmark/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookmarkCollection.deleteOne(query);
+      res.send(result);
     })
-    app.post('/addtobookmark',async(req,res)=>{
+    app.post("/api/addtobookmark", async (req, res) => {
       const bookmarkData = req.body;
-      const result = await bookmarkCollection.insertOne(bookmarkData)
-      res.send(result)
-    })
+      console.log(bookmarkData);
+      const result = await bookmarkCollection.insertOne(bookmarkData);
+      res.send(result);
+    });
 
     app.get("/api/getbidreq", verifyToken, async (req, res) => {
       try {
